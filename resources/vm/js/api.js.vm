@@ -1,0 +1,75 @@
+import request from '../request.js';
+
+import {PTD_EQUIPMENT} from "@/const/server";
+
+/**
+ * 分页查询${functionName}列
+ * @param query
+ */
+export function ${businessName}QueryPageList(query) {
+  return request({
+    url: PTD_EQUIPMENT + '/${businessName}/queryPageList',
+    method: 'get',
+    params: query
+  })
+}
+
+/**
+ * 查询${functionName}详细
+ * @param id
+ */
+export function ${businessName}QueryById(id) {
+  return request({
+    url: PTD_EQUIPMENT + '/${businessName}/queryById' ,
+    method: 'get',
+    params: {id:id}
+  })
+}
+
+/**
+ * 新增${functionName}
+ * @param data
+ */
+export function add${BusinessName}(data) {
+  return request({
+    url: PTD_EQUIPMENT + '/${businessName}/add',
+    method: 'post',
+    data: data
+  })
+}
+/**
+ * 修改${functionName}
+ * @param data
+ */
+export function update${BusinessName}(data) {
+  return request({
+    url: PTD_EQUIPMENT + '/${businessName}/update',
+    method: 'put',
+    data: data
+  })
+}
+
+/**
+ * 删除${functionName}
+ * @param id
+ */
+export function delete${BusinessName}ById(id) {
+  return request({
+    url: PTD_EQUIPMENT + '/${businessName}/deleteById' ,
+    method: 'delete',
+    params: {id:id}
+  })
+}
+
+/**
+ * 批量删除${functionName}
+ * @param ids
+ */
+export function delete${BusinessName}(ids) {
+  return request({
+    url: PTD_EQUIPMENT + '/${businessName}/delete' ,
+    method: 'delete',
+    params: {ids:ids}
+  })
+}
+

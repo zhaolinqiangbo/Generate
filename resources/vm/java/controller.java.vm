@@ -1,0 +1,128 @@
+package ${packageName}.controller;
+
+import java.util.Arrays;
+import java.util.List;
+
+import com.ibi.common.idempotent.annotation.RepeatSubmit;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+#if($isUseMethodLog)
+import com.ibi.common.log.annotation.Log;
+import com.ibi.common.log.enums.BusinessType;
+#end
+import com.ibi.common.core.controller.BaseController;
+import com.ibi.common.mybatisplus.page.PageQuery;
+import com.ibi.common.result.R;
+import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Operation;
+import com.ibi.common.core.validate.AddGroup;
+import com.ibi.common.core.validate.EditGroup;
+import ${packageName}.domain.vo.${ClassName}Vo;
+import ${packageName}.domain.bo.${ClassName}Bo;
+import ${packageName}.service.I${ClassName}Service;
+import com.ibi.common.mybatisplus.page.TableDataInfo;
+
+/**
+ * ${functionName}
+ *
+ */
+@Validated
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/${businessName}")
+@Api(tags = "${functionName}相关接口", description = "${functionName}相关接口")
+public class ${ClassName}Controller extends BaseController {
+
+    private final I${ClassName}Service i${ClassName}Service;
+
+    /**
+     * 分页查询${functionName}列表
+     */
+    @Operation(summary ="分页查询${functionName}列表")
+    @GetMapping("/queryPageList")
+    public R<TableDataInfo<${ClassName}Vo>> queryPageList(${ClassName}Bo bo, PageQuery pageQuery) {
+        return R.ok(i${ClassName}Service.queryPageList(bo, pageQuery));
+    }
+
+    /**
+     * 查询${functionName}列表
+     */
+    @Operation(summary ="查询${functionName}列表")
+    @GetMapping("/list")
+    public R<List<${ClassName}Vo>> getList(${ClassName}Bo bo) {
+        List<${ClassName}Vo> list = i${ClassName}Service.queryList(bo);
+        return R.ok(list);
+    }
+
+    /**
+     * 获取${functionName}详细信息
+     *
+     * @param ${pkColumn.javaField} 主键
+     */
+    @Operation(summary ="获取${functionName}详细信息")
+    @GetMapping("/queryById")
+    public R<${ClassName}Vo> queryById(${pkColumn.javaType} ${pkColumn.javaField}) {
+        return R.ok(i${ClassName}Service.queryById(${pkColumn.javaField}));
+    }
+
+    /**
+     * 新增${functionName}
+     */
+    @Operation(summary ="新增${functionName}")
+    #if($isUseMethodLog)
+    @Log(title = "新增${functionName}", businessType = BusinessType.INSERT)
+    #end
+    @RepeatSubmit()
+    @PostMapping("/add")
+    public R<Void> add(@Validated(AddGroup.class) @RequestBody ${ClassName}Bo bo) {
+        Boolean result = i${ClassName}Service.insertByBo(bo);
+        return toAjax(result ? 1 : 0);
+    }
+
+    /**
+     * 修改${functionName}
+     */
+    @Operation(summary ="修改${functionName}")
+    #if($isUseMethodLog)
+    @Log(title = "修改${functionName}", businessType = BusinessType.UPDATE)
+    #end
+    @RepeatSubmit()
+    @PutMapping("/update")
+    public R<Void>  update(@Validated(EditGroup.class) @RequestBody ${ClassName}Bo bo) {
+        Boolean result = i${ClassName}Service.updateByBo(bo);
+        return toAjax(result ? 1 : 0);
+    }
+
+    /**
+     * 删除${functionName}
+     *
+     * @param ${pkColumn.javaField} 主键
+     */
+    @Operation(summary ="删除${functionName}")
+    #if($isUseMethodLog)
+    @Log(title = "删除${functionName}", businessType = BusinessType.DELETE)
+    #end
+    @RepeatSubmit()
+    @DeleteMapping("/deleteById")
+    public R<Void>  deleteById(${pkColumn.javaType} ${pkColumn.javaField}) {
+        Boolean result = i${ClassName}Service.deleteById(${pkColumn.javaField});
+        return toAjax(result ? 1 : 0);
+    }
+
+    /**
+     * 批量删除${functionName}
+     *
+     * @param ${pkColumn.javaField}s 主键串
+     */
+    @Operation(summary ="删除${functionName}")
+    #if($isUseMethodLog)
+    @Log(title = "批量删除${functionName}", businessType = BusinessType.DELETE)
+    #end
+    @RepeatSubmit()
+    @DeleteMapping("/delete")
+    public R<Void> delete(${pkColumn.javaType}[] ${pkColumn.javaField}s) {
+        Boolean result = i${ClassName}Service.deleteIds(Arrays.asList(${pkColumn.javaField}s));
+        return toAjax(result ? 1 : 0);
+    }
+}

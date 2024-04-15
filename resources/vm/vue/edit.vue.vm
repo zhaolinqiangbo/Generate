@@ -1,0 +1,188 @@
+<template>
+  <el-ibi-drawer
+      :title="title"
+      :visible.sync="isShow"
+      size="small"
+      :modal="false"
+      :modal-append-to-body="false"
+  >
+    <div slot='header'>
+      <el-button type="primary" :loading="buttonLoading" @click="submitForm">提交</el-button>
+    </div>
+    <el-ibi-form-box>
+      <el-form :model="form" :rules="rules" ref="form" class="form" :loading="loading">
+        <el-row :gutter="20">
+        #foreach($column in $columns)
+          #set($field=$column.javaField)
+          #if($column.insert && !$column.pk)
+            #set($parentheseIndex=$column.columnComment.indexOf("（"))
+            #if($parentheseIndex != -1)
+              #set($comment=$column.columnComment.substring(0, $parentheseIndex))
+            #else
+              #set($comment=$column.columnComment)
+            #end
+            #set($dictType=$column.dictType)
+            #if($column.htmlType == "input")
+          <el-col :span="12">
+            <el-form-item label="${comment}" prop="${field}">
+              <el-input v-model="form.${field}" placeholder="请输入${comment}" />
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "imageUpload")
+          <el-col :span="12">
+            <el-form-item label="${comment}">
+              <image-upload v-model="form.${field}"/>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "fileUpload")
+          <el-col :span="12">
+            <el-form-item label="${comment}">
+              <file-upload v-model="form.${field}"/>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "editor")
+          <el-col :span="12">
+            <el-form-item label="${comment}">
+              <editor v-model="form.${field}" :min-height="192"/>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "select" && $dictType)
+          <el-col :span="12">
+            <el-form-item label="${comment}" prop="${field}">
+              <el-select v-model="form.${field}" placeholder="请选择${comment}">
+                <el-option label="请选择字典生成" value="" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "checkbox" && $dictType)
+          <el-col :span="12">
+            <el-form-item label="${comment}">
+              <el-checkbox-group v-model="form.${field}">
+                <el-checkbox>请选择字典生成</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "radio" && $dictType)
+          <el-col :span="12">
+            <el-form-item label="${comment}">
+              <el-radio-group v-model="form.${field}">
+                <el-radio label="1">请选择字典生成</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "datetime")
+          <el-col :span="12">
+            <el-form-item label="${comment}" prop="${field}">
+              <el-date-picker clearable v-model="form.${field}" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="请选择${comment}"></el-date-picker>
+            </el-form-item>
+          </el-col>
+            #elseif($column.htmlType == "textarea")
+          <el-col :span="12">
+            <el-form-item label="${comment}" prop="${field}">
+              <el-input v-model="form.${field}" type="textarea" placeholder="请输入内容" />
+            </el-form-item>
+          </el-col>
+            #end
+          #end
+        #end
+        </el-row>
+      </el-form>
+    </el-ibi-form-box>
+  </el-ibi-drawer>
+</template>
+<script>
+  import { ${businessName}QueryById, add${BusinessName}, update${BusinessName} } from "@/api/${moduleName}/${businessName}";
+
+  export default {
+    props: {
+      visible: Boolean,
+      title: String
+    },
+    name: "${BusinessName}",
+    data() {
+      return {
+        // 按钮loading
+        buttonLoading: false,
+        // 表单loading
+        loading: false,
+        #foreach ($column in $columns)
+          #if($column.htmlType == "datetime" && $column.queryType == "BETWEEN")
+            #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+            // $comment时间范围
+        daterange${AttrName}: [],
+          #end
+        #end
+        form: {
+        },
+        // 表单校验
+        rules: {
+          #foreach ($column in $columns)
+            #if($column.required)
+              #set($parentheseIndex=$column.columnComment.indexOf("（"))
+              #if($parentheseIndex != -1)
+                #set($comment=$column.columnComment.substring(0, $parentheseIndex))
+              #else
+                #set($comment=$column.columnComment)
+              #end
+          $column.javaField: [{required: true, message: "$comment不能为空", trigger: #if($column.htmlType == "select")"change" #else"blur"#end }]#if($foreach.count != $columns.size()),#end
+            #end
+          #end
+        }
+      }
+    },
+    computed:{
+      isShow:{
+        get() {
+          return this.visible;
+        },
+        set(val) {
+          this.$emit('update:visible', val);
+        }
+      }
+    },
+    //初始化，先执行
+    created() {},
+    //渲染完成，后执行
+    mounted() {},
+    methods: {
+      close() {
+        this.$emit('closeDrawer')
+      },
+      toShow(id) {
+        this.form = {};
+        if (id) {
+          this.loading = true;
+          ${businessName}QueryById(id).then(response => {
+            this.form = response.data;
+          }).finally(() => {
+            this.loading = false;
+          });
+        }
+      },
+      /** 提交按钮 */
+      submitForm() {
+        /** 提交按钮 */
+        this.#[[$]]#refs["form"].validate(valid => {
+          if (valid) {
+            this.buttonLoading = true;
+            if (this.form.${pkColumn.javaField} != null) {
+              update${BusinessName}(this.form).then(response => {
+                this.#[[$]]#message.success('保存成功');
+                this.$emit('closeDrawer')
+              }).finally(() => {
+                this.buttonLoading = false;
+              });
+            } else {
+              add${BusinessName}(this.form).then(response => {
+                this.#[[$]]#message.success('保存成功');
+                this.$emit('closeDrawer')
+              }).finally(() => {
+                this.buttonLoading = false;
+              });
+            }
+          }
+        });
+      }
+    }
+  }
+</script>

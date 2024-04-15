@@ -1,0 +1,43 @@
+package ${packageName}.domain.vo;
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import com.ibi.common.core.domain.vo.BaseEntityVo;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
+/**
+ * ${functionName}视图对象 ${tableName}
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Data
+public class ${ClassName}Vo extends BaseEntityVo {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+#if($column.isQuery)
+    /**
+     * $column.columnComment
+     */
+    @Schema(description = "$column.columnComment")
+#set($parentheseIndex=$column.columnComment.indexOf("（"))
+#if($parentheseIndex != -1)
+#set($comment=$column.columnComment.substring(0, $parentheseIndex))
+#else
+#set($comment=$column.columnComment)
+#end
+    #if($column.javaField == 'id')
+    @JsonSerialize(using = ToStringSerializer.class)
+    #end
+    private $column.javaType $column.javaField;
+
+#end
+#end
+
+}

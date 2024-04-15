@@ -1,0 +1,39 @@
+----------------------------------------start-生成前端：菜单和按钮权限-start---------------------------------------
+-- 备注：1：parent_id根据需要手动修改  2：create_user和update_user可以为空，也可以手动添加
+INSERT INTO `menu`(id,parent_id,menu_name,path,component,query_param,menu_type,perms,sort,is_frame,is_buffer,status,is_hide,icon,create_user,create_time,update_user,update_time)
+VALUES (${table.menuIds[0]}, 0, '${functionName}管理', '${businessName}', '/${moduleName}/${businessName}/index', '', 'M', '', 0, 0, 1, 1, 0, '', null, '${time}', null, '${time}');
+
+INSERT INTO `menu`(id,parent_id,menu_name,path,component,query_param,menu_type,perms,sort,is_frame,is_buffer,status,is_hide,icon,create_user,create_time,update_user,update_time)
+VALUES (${table.menuIds[1]}, ${table.menuIds[0]}, '${functionName}新增', '#', '', '', 'B', '${permissionPrefix}:add', 1, 0, 1, 1, 0, '', null, '${time}', null, '${time}');
+
+INSERT INTO `menu`(id,parent_id,menu_name,path,component,query_param,menu_type,perms,sort,is_frame,is_buffer,status,is_hide,icon,create_user,create_time,update_user,update_time)
+VALUES (${table.menuIds[2]}, ${table.menuIds[0]}, '${functionName}修改', '#', '', '', 'B', '${permissionPrefix}:update', 2, 0, 1, 1, 0, '', null, '${time}', null, '${time}');
+
+INSERT INTO `menu`(id,parent_id,menu_name,path,component,query_param,menu_type,perms,sort,is_frame,is_buffer,status,is_hide,icon,create_user,create_time,update_user,update_time)
+VALUES (${table.menuIds[3]}, ${table.menuIds[0]}, '${functionName}删除-单个', '#', '', '', 'B', '${permissionPrefix}:deletebyid', 3, 0, 1, 1, 0, '', null, '${time}', null, '${time}');
+
+INSERT INTO `menu`(id,parent_id,menu_name,path,component,query_param,menu_type,perms,sort,is_frame,is_buffer,status,is_hide,icon,create_user,create_time,update_user,update_time)
+VALUES (${table.menuIds[4]}, ${table.menuIds[0]}, '${functionName}删除-批量', '#', '', '', 'B', '${permissionPrefix}:delete', 4, 0, 1, 1, 0, '', null, '${time}', null, '${time}');
+----------------------------------------end-生成前端：菜单和按钮权限-end---------------------------------------
+
+
+----------------------------------------start-生成后端：方法权限-start-----------------------------------------
+-- 备注：1：create_user和update_user可以为空，也可以手动添加
+INSERT INTO `method`(id,method_name,perms,sort,is_deleted,status,create_user,create_time,update_user,update_time)
+VALUES (${table.methodIds[0]},'${functionName}分页查询','${permissionPrefix}:querypageList', 1, 0, 1, null, '${time}', null, '${time}');
+
+INSERT INTO `method`(id,method_name,perms,sort,is_deleted,status,create_user,create_time,update_user,update_time)
+VALUES (${table.methodIds[1]},'${functionName}查询详情','${permissionPrefix}:querybyid', 2, 0, 1, null, '${time}', null, '${time}');
+
+INSERT INTO `method`(id,method_name,perms,sort,is_deleted,status,create_user,create_time,update_user,update_time)
+VALUES (${table.methodIds[2]},'${functionName}新增','${permissionPrefix}:add', 3, 0, 1, null, '${time}', null, '${time}');
+
+INSERT INTO `method`(id,method_name,perms,sort,is_deleted,status,create_user,create_time,update_user,update_time)
+VALUES (${table.methodIds[3]},'${functionName}修改','${permissionPrefix}:update', 4, 0, 1, null, '${time}', null, '${time}');
+
+INSERT INTO `method`(id,method_name,perms,sort,is_deleted,status,create_user,create_time,update_user,update_time)
+VALUES (${table.methodIds[4]},'${functionName}删除-单个','${permissionPrefix}:deletebyid', 5, 0, 1, null, '${time}', null, '${time}');
+
+INSERT INTO `method`(id,method_name,perms,sort,is_deleted,status,create_user,create_time,update_user,update_time)
+VALUES (${table.methodIds[5]},'${functionName}删除-批量','${permissionPrefix}:delete', 6, 0, 1, null, '${time}', null, '${time}');
+----------------------------------------end-生成后端：方法权限-end-----------------------------------------------

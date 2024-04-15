@@ -1,0 +1,55 @@
+package ${packageName}.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import ${packageName}.domain.entity.${ClassName};
+import ${packageName}.domain.vo.${ClassName}Vo;
+import ${packageName}.domain.bo.${ClassName}Bo;
+import com.ibi.common.mybatisplus.page.PageQuery;
+import com.ibi.common.mybatisplus.page.TableDataInfo;
+
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * ${functionName}Service接口
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+public interface I${ClassName}Service extends IService<${ClassName}> {
+
+    /**
+     * 分页查询${functionName}列表
+     */
+    TableDataInfo<${ClassName}Vo> queryPageList(${ClassName}Bo bo, PageQuery pageQuery);
+
+    /**
+     * 查询${functionName}列表
+     */
+    List<${ClassName}Vo> queryList(${ClassName}Bo bo);
+
+    /**
+     * 查询${functionName}
+     */
+    ${ClassName}Vo queryById(${pkColumn.javaType} ${pkColumn.javaField});
+
+    /**
+     * 新增${functionName}
+     */
+    Boolean insertByBo(${ClassName}Bo bo);
+
+    /**
+     * 修改${functionName}
+     */
+    Boolean updateByBo(${ClassName}Bo bo);
+
+    /**
+     * 删除${functionName}信息
+     */
+    Boolean deleteById(${pkColumn.javaType} id);
+
+    /**
+     * 校验并批量删除${functionName}信息
+     */
+    Boolean deleteIds(Collection<${pkColumn.javaType}> ids);
+}

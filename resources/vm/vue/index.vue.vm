@@ -1,0 +1,338 @@
+<template>
+  <div class="h100">
+    <el-ibi-card title="${functionName}列表">
+      <div slot="header">
+        <el-button type="success" @click="handleAdd()">新增</el-button>
+      </div>
+      <el-ibi-table-box @maxheight="(val)=>autoHeight=val-70" @handleEvent="handleEvent">
+        <template slot="search">
+          <el-form :inline="true" :model="searchParams" ref="queryForm" v-show="showSearch">
+              #foreach($column in $columns)
+                  #if($column.query)
+                      #set($dictType=$column.dictType)
+                      #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+                      #set($parentheseIndex=$column.columnComment.indexOf("（"))
+                      #if($parentheseIndex != -1)
+                          #set($comment=$column.columnComment.substring(0, $parentheseIndex))
+                      #else
+                          #set($comment=$column.columnComment)
+                      #end
+                      #if($column.htmlType == "input" || $column.htmlType == "textarea")
+            <el-form-item label="${comment}" prop="${column.javaField}">
+              <el-input v-model="searchParams.${column.javaField}" placeholder="请输入${comment}" clearable @keyup.enter.native="handleQuery"/>
+            </el-form-item>
+                      #elseif(($column.htmlType == "select" || $column.htmlType == "radio") && $dictType)
+            <el-form-item label="${comment}" prop="${column.javaField}">
+              <el-select v-model="searchParams.${column.javaField}" placeholder="请选择${comment}" clearable>
+                <el-option label="请选择字典生成" value=""/>
+              </el-select>
+            </el-form-item>
+                      #elseif($column.htmlType == "datetime" && $column.queryType != "BETWEEN")
+            <el-form-item label="${comment}" prop="${column.javaField}">
+              <el-date-picker clearable v-model="searchParams.${column.javaField}" type="date" value-format="yyyy-MM-dd" placeholder="请选择${comment}"></el-date-picker>
+            </el-form-item>
+                      #elseif($column.htmlType == "datetime" && $column.queryType == "BETWEEN")
+            <el-form-item label="${comment}">
+              <el-date-picker v-model="daterange${AttrName}" style="width: 240px" value-format="yyyy-MM-dd" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+            </el-form-item>
+                      #end
+                  #end
+              #end
+            <el-form-item>
+              <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+              <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </template>
+        <template slot="adSearch">
+        </template>
+        <el-table v-loading="loading" :data="${businessName}List" @selection-change="handleSelectionChange" :cell-style="{ textAlign: 'left' }" border :header-cell-style="{textAlign: 'left',color:'#606266'}">
+          <el-table-column type="selection" width="55" align="center"/>
+            #foreach($column in $columns)
+                #set($javaField=$column.javaField)
+                #set($parentheseIndex=$column.columnComment.indexOf("（"))
+                #if($parentheseIndex != -1)
+                    #set($comment=$column.columnComment.substring(0, $parentheseIndex))
+                #else
+                    #set($comment=$column.columnComment)
+                #end
+                #if($column.pk)
+          <el-table-column label="${comment}" prop="${javaField}" v-if="${column.list}"/>
+                #elseif($column.list && $column.htmlType == "imageUpload")
+          <el-table-column label="${comment}" align="center" prop="${javaField}" width="100">
+            <template v-slot="scope">
+              <image-preview :src="scope.row.${javaField}" :width="50" :height="50"/>
+            </template>
+          </el-table-column>
+                #elseif($column.list && $column.dictType && "" != $column.dictType)
+          <el-table-column label="${comment}" align="center" prop="${javaField}">
+            <template v-slot="scope">
+                #if($column.htmlType == "checkbox")
+                  <dict-tag :options="dict.type.${column.dictType}" :value="scope.row.${javaField} ? scope.row.${javaField}.split(',') : []"/>
+                #else
+                  <dict-tag :options="dict.type.${column.dictType}" :value="scope.row.${javaField}"/>
+                #end
+            </template>
+          </el-table-column>
+                #elseif($column.list && "" != $javaField)
+          <el-table-column label="${comment}" align="center" prop="${javaField}"/>
+                #end
+            #end
+          <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+            <template v-slot="scope">
+              <el-button type="text" class="color-warning" @click="handleUpdate(scope.row)" >修改</el-button>
+              <el-button type="text" class="color-danger" @click="handleDelete(scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <template slot="footer">
+          <el-pagination :current-page.sync="queryParams.pageNum" :page-size="queryParams.pageSize"
+                         :total="queryParams.total" :page-sizes="[10, 100, 200, 300, 400]" background
+                         layout="total,sizes,prev, pager, next, jumper" @current-change="handleCurrentChange"
+                         @size-change="handleSizeChange"/>
+        </template>
+      </el-ibi-table-box>
+    </el-ibi-card>
+    <!--  添加或修改${functionName}对话框 -->
+    <edit :title="title"  v-if="isShow" ref="edit" :visible.sync="isShow" @closeDrawer="closeDrawer"></edit>
+  </div>
+</template>
+
+<script>
+  import {${businessName}QueryPageList, delete${BusinessName}ById, delete${BusinessName}} from "@/api/${moduleName}/${businessName}";
+  import edit from "./edit";
+
+  export default {
+    name: "${BusinessName}",
+    components: {edit},
+    data() {
+      return {
+        autoHeight:'unset',
+        // 抽屉页面
+        isShow: false,
+        // 遮罩层
+        loading: false,
+        // 选中数组
+        ids: '',
+          #if($table.sub)
+            // 子表选中数据
+        checked${subClassName}: [],
+          #end
+        // 非单个禁用
+        single: true,
+        // 非多个禁用
+        multiple: true,
+        // 显示搜索条件
+        showSearch: true,
+        // 总条数
+        total: 0,
+        // 弹窗标题
+        title: '',
+        // ${functionName}表格数据
+        ${businessName}List: [],
+          #if($table.sub)
+            // ${subTable.functionName}表格数据
+        ${subclassName}List: [],
+          #end
+          #foreach ($column in $columns)
+              #if($column.htmlType == "datetime" && $column.queryType == "BETWEEN")
+                  #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+                // $comment时间范围
+        daterange${AttrName}: [],
+              #end
+          #end
+        // 查询参数
+        queryParams: {
+          pageNum: 1,
+          pageSize: 10,
+          total: 0
+        },
+        //普通搜索条件
+        searchParams:{
+          #foreach ($column in $columns)
+            #if($column.query)
+          $column.javaField: ''#if($foreach.count != $columns.size()),#end
+            #end
+          #end
+        },
+        //高级搜索条件
+        searchAdParams:{
+        },
+      };
+    },
+    /**
+     * 初始化，先执行
+     */
+    created() {
+      this.getList();
+    },
+    /**
+     * 渲染完成，后执行
+     */
+    mounted() {},
+    methods: {
+      closeDrawer() {
+        this.isShow = false
+        this.getList()
+      },
+      /**
+       * 查询${functionName}列表
+       */
+      getList() {
+        this.loading = true;
+          #foreach ($column in $columns)
+              #if($column.htmlType == "datetime" && $column.queryType == "BETWEEN")
+        this.queryParams.params = {};
+                  #break
+              #end
+          #end
+          #foreach ($column in $columns)
+              #if($column.htmlType == "datetime" && $column.queryType == "BETWEEN")
+                  #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+                if (null != this.daterange${AttrName} && '' != this.daterange${AttrName}) {
+        this.queryParams.params["begin${AttrName}"] = this.daterange${AttrName}[0];
+        this.queryParams.params["end${AttrName}"] = this.daterange${AttrName}[1];
+                }
+              #end
+          #end
+        ${businessName}QueryPageList(this.queryParams).then(response => {
+          this.${businessName}List = response.data.rows;
+          this.queryParams.total = response.data.total;
+          this.loading = false;
+        });
+      },
+      handleSizeChange(val) {
+        this.queryParams.pageSize = val;
+        this.getList();
+      },
+      handleCurrentChange(val) {
+        this.queryParams.pageNum = val;
+        this.getList();
+      },
+      handleEvent(data) {
+        if(data.type === 'add') {
+          this.handleAdd();
+        }
+        if(data.type === 'search') {
+          this.handleAdQuery();
+        }
+        if(data.type === 'reset') {
+          this.resetAdQuery();
+        }
+      },
+      /**
+       * 普通搜索按钮操作
+       */
+      handleQuery() {
+        this.queryParams = {
+          pageNum: 1,
+          pageSize: 10,
+          total: 0
+        }
+        this.queryParams = Object.assign(this.queryParams,this.searchParams);
+        this.queryParams.pageNum = 1;
+        this.getList();
+      },
+      /**
+       * 普通重置按钮操作
+       */
+      resetQuery() {
+        this.searchParams = this.$options.data().searchParams
+        this.handleQuery();
+      },
+      /**
+       * 高级搜索按钮操作
+       */
+      handleAdQuery() {
+        this.queryParams = Object.assign(this.queryParams,this.searchParams,this.searchAdParams);
+        this.queryParams.pageNum = 1;
+        this.getList();
+      },
+      /**
+       * 高级重置按钮操作
+       */
+      resetAdQuery() {
+        this.searchAdParams = this.$options.data().searchAdParams
+        this.searchParams = this.$options.data().searchParams
+        this.handleAdQuery();
+      },
+      /**
+       * 多选框选中数据
+       *
+       * @param selection
+       */
+      handleSelectionChange(selection) {
+        this.ids = selection.map(item => item.${pkColumn.javaField}).join(',')
+        this.single = selection.length !== 1
+        this.multiple = !selection.length
+      },
+      /**
+       * 新增按钮操作
+       */
+      handleAdd() {
+        this.title = "添加${functionName}";
+        this.isShow = true;
+        this.$nextTick(() => {
+          this.$refs.edit.toShow();
+        })
+      },
+      /**
+       * 修改按钮操作
+       * @param row
+       */
+      handleUpdate(row) {
+        const ${pkColumn.javaField} = row.${pkColumn.javaField}
+        this.title = "修改${functionName}";
+        this.isShow = true;
+        this.$nextTick(() => {
+          this.$refs.edit.toShow(id);
+        })
+      },
+      /**
+       * 删除按钮操作
+       *
+       * @param row
+       */
+      handleDelete(row) {
+        this.$confirm('是否确认删除该数据？').then(() => {
+          this.loading = true;
+          delete${BusinessName}ById(row.${pkColumn.javaField}).then(response => {
+          });
+        }).then(() => {
+          this.loading = false;
+          this.getList();
+          this.$message({
+            type: "success",
+            message: "操作成功!"
+          });
+        }).catch(() => {
+        }).finally(() => {
+          this.loading = false;
+        });
+      },
+      /**
+       * 批量删除按钮操作
+       *
+       * @param row
+       */
+      handleDeleteAll(row) {
+        const ${pkColumn.javaField}s = row.${pkColumn.javaField} || this.ids;
+        this.$confirm('是否确认删除？').then(() => {
+          this.loading = true;
+          delete${BusinessName}(${pkColumn.javaField}s).then(response => {
+          });
+        }).then(() => {
+          this.loading = false;
+          this.getList();
+          this.$message({
+            type: "success",
+            message: "操作成功!"
+          });
+        }).catch(() => {
+        }).finally(() => {
+          this.loading = false;
+        });
+      },
+    }
+  };
+</script>
