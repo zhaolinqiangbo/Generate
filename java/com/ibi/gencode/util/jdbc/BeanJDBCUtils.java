@@ -67,10 +67,11 @@ public class BeanJDBCUtils<T> extends JDBCUtils {
 
             return list;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+           e.printStackTrace();
         } finally {
             close(connection, resultSet);
         }
+        return null;
     }
 
 

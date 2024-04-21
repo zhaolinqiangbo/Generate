@@ -1,5 +1,6 @@
 package com.ibi.gencode.util.jdbc;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,17 +18,25 @@ public class JDBCUtils {
     private static final String userName;
     private static final String password;
     private static final String driver;
+    private static Properties propertieMy;
 
-    static {
-
+    public static Properties getProperties() throws IOException {
         Properties properties = new Properties();
         InputStream is = JDBCUtils.class.getClassLoader().getResourceAsStream("jdbc.properties");
+        properties.load(is);
+        propertieMy=properties;
+        return properties;
+    }
+
+    static {
         try {
-            properties.load(is);
-            url = properties.getProperty("url");
-            userName = properties.getProperty("userName");
-            password = properties.getProperty("password");
-            driver = properties.getProperty("driver");
+            if (propertieMy==null){
+                propertieMy = getProperties();
+            }
+            url = propertieMy.getProperty("url");
+            userName = propertieMy.getProperty("userName");
+            password = propertieMy.getProperty("password");
+            driver = propertieMy.getProperty("driver");
 
             //注册驱动
             Class.forName(driver);
