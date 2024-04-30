@@ -19,17 +19,17 @@ public class Main {
 
         GenCodeConfig genCodeConfig1 = new GenCodeConfig();
         // 表名
-        genCodeConfig1.setTableName("tbl_back_record");
+        genCodeConfig1.setTableName("invitation_record");
         // 包名
-        genCodeConfig1.setPackageName("com.ibi.queueup");
+        genCodeConfig1.setPackageName("com.ibi.center");
         // 作者
         genCodeConfig1.setAuthor("zlq");
         // 是否使用controller方法日志
         //genCodeConfig1.setUseMethodLog(Boolean.FALSE);
 
         tableConfigList.add(genCodeConfig1);
-        GenerateService.generateCode("G:\\newCode","F:/",tableConfigList);
+        GenerateService.generateCode("G:\\newCode","G:\\newCode",tableConfigList);
 
-        System.out.println("生成成功!!!!!!!!");
+        System.out.println("生成成功!!!!!!!!，路径：G:\\newCode");
     }
 }
